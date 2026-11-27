@@ -278,7 +278,6 @@ config.example.json copied to ~/.claude/plain-workflow.json on first install
 CLAUDE-BLOCK.md     injected into ~/.claude/CLAUDE.md between markers
 hooks/
   plain-speak-reminder.sh   UserPromptSubmit, re-injects the rules each turn
-docs/specs/         design
 skills/
   plain-speak/SKILL.md
   simple-english/            vendored: SKILL.md, linter.py, lint-hook.sh
