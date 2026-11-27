@@ -47,6 +47,9 @@ clone before you install the plugin. Otherwise the rules load twice and the hook
 twice. It removes the skill links, the `CLAUDE.md` block and the hook. It keeps your
 `~/.claude/plain-workflow.json`.
 
+The plugin checks for an old setup at each session start. If it finds one, it shows a
+warning with the path to `uninstall.sh`, and Claude offers to run it.
+
 ```bash
 ./uninstall.sh --dry-run    # print every action, change nothing
 ./uninstall.sh
