@@ -1,6 +1,6 @@
 # plain-workflow
 
-Seven Claude Code skills that keep output short, tickets exact, and pull requests inside
+Eight Claude Code skills that keep output short, tickets exact, and pull requests inside
 scope.
 
 ## Why
@@ -14,6 +14,7 @@ Four problems, one cause each:
 | Tickets are hard to read | `explain-ticket` — a fixed 5-line shape, 120 words |
 | Review loops never end | `safe-review` — 3 gates, only merge blockers survive |
 | Posting a review means copy and paste | `post-review` — pick what to post, one review |
+| Unsafe pull requests get opened | `ship-it` — ticket to pull request, safe-review first |
 | Fixes for review comments cause new bugs | `answer-review` — triage, then prove each fix |
 
 ## Install
@@ -61,7 +62,7 @@ warning with the path to `uninstall.sh`, and Claude offers to run it.
 |---|---|
 | `jq` | both hooks (without it they fall back to plain text) |
 | `git` | `safe-review`, to find the real fork point |
-| `gh`, authenticated | `explain-ticket`, `safe-review`, `post-review`, `answer-review` |
+| `gh`, authenticated | `explain-ticket`, `safe-review`, `post-review`, `answer-review`, `ship-it` |
 | `python3` | the `simple-english` linter only |
 
 No other skill or plugin is required. `pr-review-toolkit` and `code-review` are engine
@@ -191,6 +192,21 @@ Posted blockers with "Request changes" give `REQUEST_CHANGES`. Approval gives `A
 Anything else is a `COMMENT` review. No comment carries a "blocking" or "optional"
 label. On your own pull request, GitHub allows comments only.
 
+### /ship-it
+
+Ships the uncommitted changes in one run: ticket, branch, commit, safe review, push,
+pull request.
+
+1. Drafts the ticket with `write-ticket` and creates it after your yes.
+2. Cuts a branch (`ENG-42-<slug>` for Jira, `42-<slug>` for GitHub) and commits the
+   named paths.
+3. Runs `safe-review` on the branch.
+4. NOT SAFE: fixes the blockers only, commits, and reviews again. Max 2 fix rounds.
+5. SAFE TO MERGE: pushes and opens the pull request.
+
+Still NOT SAFE after 2 fix rounds? It stops. Nothing is pushed, no pull request opens,
+and it lists the blockers left.
+
 ### /answer-review
 
 Triages every review comment as REAL, FALSE POSITIVE, or OUT OF SCOPE, each with
@@ -291,5 +307,6 @@ skills/
   safe-review/SKILL.md, GATES.md
     scripts/pr-context.sh   copied from pr-review, so there is no outside dependency
   post-review/SKILL.md
+  ship-it/SKILL.md
   answer-review/SKILL.md
 ```
