@@ -37,8 +37,8 @@ Restart Claude Code afterwards. The plugin brings three things:
 3. A `UserPromptSubmit` hook that re-adds the short rules on every prompt.
 
 The review engine and the Jira keys live in `~/.claude/plain-workflow.json`. The plugin
-does not create it. Copy `config.example.json` there to set them. No file means
-`reviewer: auto` and GitHub only. See [Configuration](#configuration).
+does not create it. The first `/safe-review` asks for the engine and creates the file.
+Add `jira_host` and `jira_keys` there by hand. See [Configuration](#configuration).
 
 Remove the plugin with `/plugin uninstall plain-workflow@plain-workflow`.
 
@@ -153,7 +153,7 @@ Does not read code. Does not propose an approach. Does not estimate.
 Answers one question: is this safe for main?
 
 **The engine is yours to pick.** Set `reviewer` in `~/.claude/plain-workflow.json`.
-No file means `auto`.
+No file yet? The first `/safe-review` asks once and saves the answer.
 
 | `reviewer` | What runs |
 |---|---|

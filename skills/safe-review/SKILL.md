@@ -63,7 +63,15 @@ No gate applies? Say `RULES CHECK: no gating rule applies` in the output.
 
 ### 3. Run the configured engine
 
-Read `~/.claude/plain-workflow.json` and take `.reviewer`. A missing file means `auto`.
+Read `~/.claude/plain-workflow.json` and take `.reviewer`. A file with no `reviewer`
+key means `auto`.
+
+**No config file yet?** Ask once, with one `AskUserQuestion`: "Which review engine
+should safe-review use?" Offer `auto (Recommended)`, then each engine below that exists
+here, then `builtin`. Save the answer with the shape of the plugin's
+`config.example.json`: `{"reviewer": "<value>", "jira_host": "", "jira_keys": {}}`.
+Save the bare value, such as `auto`, never the option label `auto (Recommended)`.
+Then run that engine. Never ask again once the file exists.
 
 | Value | What to run |
 |---|---|
@@ -212,7 +220,9 @@ VERDICT: NOT SAFE   (engine: builtin)
 
 Output goes to chat. This skill never comments on GitHub.
 
-For a pull request, load `post-review` next and follow it. It asks the user what to post.
+For a pull request, load `post-review` in the same turn and follow it. **Do not ask
+whether to start it.** Its own questions are the confirmation, and it posts nothing
+without an answer. Asking first adds a second, empty confirmation.
 
 ### 7. Remove the review worktrees
 

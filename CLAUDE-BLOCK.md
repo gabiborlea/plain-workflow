@@ -24,7 +24,7 @@ The scope named in the ticket or the PR is a contract.
 
 ## Review engine (always on)
 
-`reviewer` in `~/.claude/plain-workflow.json` is a standing request, given once instead of every time. When running `/safe-review`, run that engine without asking again, even one that spawns agents. Fall back to `builtin` only if the engine is missing or the call is denied.
+`reviewer` in `~/.claude/plain-workflow.json` is a standing request, given once instead of every time. When running `/safe-review`, run that engine without asking again, even one that spawns agents. If the file is missing, ask once which engine to use (safe-review step 3). Fall back to `builtin` only if the engine is missing or the call is denied. On a pull request, start `post-review` right after the verdict, without asking. Its questions are the confirmation.
 
 ## Code comments (always on)
 

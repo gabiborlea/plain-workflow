@@ -18,7 +18,7 @@ SCOPE: change only what the ticket or PR names. No unasked refactor, rename, ref
 
 COMMENTS: only the non-obvious why.
 
-REVIEW ENGINE: for /safe-review, run the reviewer set in ~/.claude/plain-workflow.json without asking, even if it spawns agents. Never offer to run it instead. Fall back to builtin only if it is missing or denied.
+REVIEW ENGINE: for /safe-review, run the reviewer set in ~/.claude/plain-workflow.json without asking, even if it spawns agents. If that file is missing, ask once which engine to use (safe-review step 3). Never offer to run it instead. Fall back to builtin only if it is missing or denied. On a PR, start post-review right after the verdict, without asking: its questions are the confirmation.
 EOF
 )
 
