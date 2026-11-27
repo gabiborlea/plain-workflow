@@ -1,6 +1,6 @@
 # plain-workflow
 
-Six Claude Code skills that keep output short, tickets exact, and pull requests inside
+Seven Claude Code skills that keep output short, tickets exact, and pull requests inside
 scope.
 
 ## Why
@@ -13,67 +13,56 @@ Four problems, one cause each:
 | Ticket scope is vague, so the PR drifts | `write-ticket` — an explicit out-of-scope list |
 | Tickets are hard to read | `explain-ticket` — a fixed 5-line shape, 120 words |
 | Review loops never end | `safe-review` — 3 gates, only merge blockers survive |
+| Posting a review means copy and paste | `post-review` — pick what to post, one review |
 | Fixes for review comments cause new bugs | `answer-review` — triage, then prove each fix |
 
 ## Install
 
-```bash
-git clone <this repo> plain-workflow
-cd plain-workflow
-./install.sh
+> **Installed plain-workflow before with `install.sh`?** Run `./uninstall.sh` from that
+> clone first. See [Coming from install.sh](#coming-from-installsh).
+
+In Claude Code:
+
+```
+/plugin marketplace add gabiborlea/plain-workflow
+/plugin install plain-workflow@plain-workflow
 ```
 
-Clone it anywhere. `install.sh` resolves its own path, and the symlinks point back to
-wherever you put it.
+Restart Claude Code afterwards. The plugin brings three things:
 
-Four things happen:
+1. The skills, from `skills/`.
+2. A `SessionStart` hook that adds `CLAUDE-BLOCK.md` to each session.
+3. A `UserPromptSubmit` hook that re-adds the short rules on every prompt.
 
-1. Each skill is symlinked into `~/.claude/skills/`.
-2. A condensed rule block is written into `~/.claude/CLAUDE.md` between markers.
-3. A `UserPromptSubmit` hook is added to `~/.claude/settings.json`.
-4. It asks which review engine `safe-review` should use, and saves the answer to
-   `~/.claude/plain-workflow.json`.
+The review engine and the Jira keys live in `~/.claude/plain-workflow.json`. The plugin
+does not create it. Copy `config.example.json` there to set them. No file means
+`reviewer: auto` and GitHub only. See [Configuration](#configuration).
 
-An existing config is never overwritten. Keys added by a later version, such as
-`jira`, are filled in without touching values you already set.
+Remove the plugin with `/plugin uninstall plain-workflow@plain-workflow`.
 
-Restart Claude Code afterwards, or open `/hooks` once to reload the config.
+### Coming from install.sh
+
+Older versions installed with `install.sh`, which is gone. Run `./uninstall.sh` from a
+clone before you install the plugin. Otherwise the rules load twice and the hook runs
+twice. It removes the skill links, the `CLAUDE.md` block and the hook. It keeps your
+`~/.claude/plain-workflow.json`.
+
+```bash
+./uninstall.sh --dry-run    # print every action, change nothing
+./uninstall.sh
+```
 
 ### Requirements
 
-`install.sh` runs a preflight and reports each one. A missing tool is a warning, never
-a hard stop.
-
 | Tool | Needed by |
 |---|---|
-| `jq` | `install.sh` (hook and config), the reminder hook |
+| `jq` | both hooks (without it they fall back to plain text) |
 | `git` | `safe-review`, to find the real fork point |
-| `gh`, authenticated | `explain-ticket`, `safe-review`, `answer-review` |
+| `gh`, authenticated | `explain-ticket`, `safe-review`, `post-review`, `answer-review` |
 | `python3` | the `simple-english` linter only |
 
 No other skill or plugin is required. `pr-review-toolkit` and `code-review` are engine
 choices, and `builtin` needs neither.
-
-```bash
-./install.sh --reviewer builtin   # set the engine, skip the prompt
-./install.sh --dry-run            # print every action, change nothing
-./install.sh --check              # exit 0 if current, 1 if not
-./uninstall.sh                    # remove links, block, and hook
-```
-
-The prompt is skipped when `--reviewer` is given, when the config already exists, or
-when there is no terminal. A non-interactive install defaults to `auto`, so CI and
-piped installs never hang.
-
-`install.sh` is safe to re-run. A real directory in the way is moved to
-`~/.claude/.plain-workflow-backups/<name>.<timestamp>`, never deleted. Backups must
-stay outside `skills/`, because Claude Code scans every directory in there and would
-register a backup as a second, duplicate skill.
-
-`CLAUDE.md` and `settings.json` are each copied to `<name>.bak.<timestamp>` before any
-edit. A malformed `settings.json` is reported and left untouched.
-
-Set `CLAUDE_DIR` to target a different config directory.
 
 ## The skills
 
@@ -86,14 +75,13 @@ Three layers keep it from fading:
 
 | Layer | When it applies |
 |---|---|
-| `CLAUDE.md` block | Loaded once at session start |
+| `SessionStart` hook | Adds `CLAUDE-BLOCK.md` once at session start |
 | `UserPromptSubmit` hook | Re-injected on **every** prompt, so it never fades in a long session |
 | `plain-speak` skill | Loaded on demand for the full rules |
 
 The hook is `hooks/plain-speak-reminder.sh`. It returns the rules as
 `additionalContext` with `suppressOutput`, so nothing appears in your transcript.
-Silence it for one shell with `PLAIN_SPEAK_OFF=1`, or run `./uninstall.sh` to remove
-it.
+Silence it for one shell with `PLAIN_SPEAK_OFF=1`, or disable the plugin.
 
 **Voice:** STE grammar, caveman brevity. Chat replies allow fragments and cap at 150
 words. Jira and GitHub text uses full sentences, max 20 words each.
@@ -159,8 +147,8 @@ Does not read code. Does not propose an approach. Does not estimate.
 
 Answers one question: is this safe for main?
 
-**The engine is yours to pick.** `install.sh` asks once and writes the answer to
-`~/.claude/plain-workflow.json`. Edit that file any time.
+**The engine is yours to pick.** Set `reviewer` in `~/.claude/plain-workflow.json`.
+No file means `auto`.
 
 | `reviewer` | What runs |
 |---|---|
@@ -183,7 +171,22 @@ Whatever the engine, every finding then passes three gates:
 Fail any gate and the finding drops to a list of at most 5 optional notes. The engine
 is swappable. The filter is not.
 
-Output goes to chat. Use the existing `pr-review` skill to post on GitHub.
+Output goes to chat. `safe-review` never posts. For a pull request, it hands off to
+`post-review`.
+
+### /post-review
+
+Posts a finished `safe-review` as one GitHub review. It asks first, and posts nothing
+without an answer.
+
+| Verdict | Questions |
+|---|---|
+| SAFE TO MERGE | Approve? · Post the optional findings: all, pick which, or none? |
+| NOT SAFE | Post the blockers: all, pick which, or none? · The same for the optional findings · Request changes? |
+
+Posted blockers with "Request changes" give `REQUEST_CHANGES`. Approval gives `APPROVE`.
+Anything else is a `COMMENT` review. No comment carries a "blocking" or "optional"
+label. On your own pull request, GitHub allows comments only.
 
 ### /answer-review
 
@@ -252,11 +255,8 @@ and not a GitHub issue. Only `strict` changes behaviour.
 
 One map, not two lists. A project appears once and carries its own mode.
 
-`config.example.json` ships with `jira_keys` empty on purpose. It seeds a fresh
-config, so any example prefix in it would become somebody's real setting.
-
-`install.sh` adds keys a newer version introduces, migrates an older layout, and never
-changes a value you set.
+`config.example.json` ships with `jira_keys` empty on purpose. Copied as-is, it must
+not turn an example prefix into somebody's real setting.
 
 ## Optional companions
 
@@ -266,17 +266,19 @@ None of these are required. The repo works without them.
 |---|---|
 | `pr-review-toolkit` | One `reviewer` option. Not vendored — it rebuilds from `settings.json`. |
 | `code-review` | Another `reviewer` option. |
-| `pr-review` | Where `scripts/pr-context.sh` came from. It can post a review to GitHub; `safe-review` never does. |
+| `pr-review` | Where `scripts/pr-context.sh` came from. It can post a review to GitHub; `post-review` covers that need for `safe-review` output. |
 | `caveman` | Not vendored, not loaded. `plain-speak` keeps grammar, which caveman drops. |
 
 ## Layout
 
 ```
-install.sh          idempotent, --dry-run, --check, --reviewer
-uninstall.sh
-config.example.json copied to ~/.claude/plain-workflow.json on first install
-CLAUDE-BLOCK.md     injected into ~/.claude/CLAUDE.md between markers
+.claude-plugin/     plugin.json, marketplace.json
+uninstall.sh        removes an old install.sh setup
+config.example.json copy to ~/.claude/plain-workflow.json to set the engine and Jira
+CLAUDE-BLOCK.md     added to each session by the SessionStart hook
 hooks/
+  hooks.json                wires the 2 hooks below
+  session-start.sh          SessionStart, adds CLAUDE-BLOCK.md
   plain-speak-reminder.sh   UserPromptSubmit, re-injects the rules each turn
 skills/
   plain-speak/SKILL.md
@@ -285,5 +287,6 @@ skills/
   explain-ticket/SKILL.md
   safe-review/SKILL.md, GATES.md
     scripts/pr-context.sh   copied from pr-review, so there is no outside dependency
+  post-review/SKILL.md
   answer-review/SKILL.md
 ```

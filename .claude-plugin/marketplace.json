@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "plain-workflow",
+  "description": "Short exact output, scoped tickets, and reviews that block only on real merge risks.",
+  "owner": {
+    "name": "Gabriel Borlea",
+    "url": "https://github.com/gabiborlea"
+  },
+  "plugins": [
+    {
+      "name": "plain-workflow",
+      "description": "Plain-speak rules, ticket skills, and a safe-review to post-review flow.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}

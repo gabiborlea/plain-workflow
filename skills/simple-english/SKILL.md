@@ -330,8 +330,8 @@ Run this pass on every draft before you return it. Do not report the pass. Just 
 100 words. Lower is cleaner.
 
 ```bash
-python3 ~/.claude/skills/simple-english/linter.py draft.md
-python3 ~/.claude/skills/simple-english/linter.py draft.md --strict
+python3 <this skill's base directory>/linter.py draft.md
+python3 <this skill's base directory>/linter.py draft.md --strict
 ```
 
 No dependencies beyond Python 3. It skips code fences, inline code, URLs, headings, and

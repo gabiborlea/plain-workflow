@@ -1,0 +1,9 @@
+{
+  "name": "plain-workflow",
+  "version": "1.0.0",
+  "description": "Short exact output, scoped tickets, and reviews that block only on real merge risks.",
+  "author": {
+    "name": "Gabriel Borlea",
+    "url": "https://github.com/gabiborlea"
+  }
+}

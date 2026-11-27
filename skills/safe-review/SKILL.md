@@ -15,7 +15,7 @@ it be nicer". Safe.
 ### 1. Get the context and the real fork point
 
 ```bash
-~/.claude/skills/safe-review/scripts/pr-context.sh <pr-url-or-number>
+<this skill's base directory>/scripts/pr-context.sh <pr-url-or-number>
 ```
 
 Prints `OWNER REPO NUMBER HEAD_SHA BASE_REF FORK_POINT SELF VIEWER`. Ignore `SELF`
@@ -171,11 +171,11 @@ so the user knows what produced the findings:
 VERDICT: NOT SAFE   (engine: builtin)
 ```
 
-### 6. Do not post
+### 6. Hand off to post-review
 
 Output goes to chat. This skill never comments on GitHub.
 
-The user has `pr-review` for posting. Say so in one line if they want it on the PR.
+For a pull request, load `post-review` next and follow it. It asks the user what to post.
 
 ### 7. Remove the review worktrees
 

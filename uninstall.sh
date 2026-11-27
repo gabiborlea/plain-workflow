@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Removes a setup made by the old install.sh: the skill links, the CLAUDE.md block and
+# the settings.json hook. Run it before you install the plugin, or the rules load twice.
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -20,7 +22,9 @@ STAMP="$(date +%Y%m%d-%H%M%S)"
 
 usage() {
   cat <<'EOF'
-uninstall.sh — remove the plain-workflow links from ~/.claude
+uninstall.sh — remove an install.sh setup of plain-workflow from ~/.claude
+
+Run it before you install the plugin. Otherwise the rules and the hook load twice.
 
   ./uninstall.sh              remove
   ./uninstall.sh --dry-run    print every action, change nothing
