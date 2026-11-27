@@ -1,6 +1,6 @@
 # plain-workflow
 
-Eight Claude Code skills that keep output short, tickets exact, and pull requests inside
+Nine Claude Code skills that keep output short, tickets exact, and pull requests inside
 scope.
 
 ## Why
@@ -15,6 +15,7 @@ Four problems, one cause each:
 | Review loops never end | `safe-review` — 3 gates, only merge blockers survive |
 | Posting a review means copy and paste | `post-review` — pick what to post, one review |
 | Unsafe pull requests get opened | `ship-it` — ticket to pull request, safe-review first |
+| Someone has to watch CI | `pr-checks` — wait, fix this PR's failures, max 2 rounds |
 | Fixes for review comments cause new bugs | `answer-review` — triage, then prove each fix |
 
 ## Install
@@ -62,7 +63,7 @@ warning with the path to `uninstall.sh`, and Claude offers to run it.
 |---|---|
 | `jq` | both hooks (without it they fall back to plain text) |
 | `git` | `safe-review`, to find the real fork point |
-| `gh`, authenticated | `explain-ticket`, `safe-review`, `post-review`, `answer-review`, `ship-it` |
+| `gh`, authenticated | `explain-ticket`, `safe-review`, `post-review`, `answer-review`, `ship-it`, `pr-checks` |
 | `python3` | the `simple-english` linter only |
 
 No other skill or plugin is required. `pr-review-toolkit` and `code-review` are engine
@@ -203,9 +204,23 @@ pull request.
 3. Runs `safe-review` on the branch.
 4. NOT SAFE: fixes the blockers only, commits, and reviews again. Max 2 fix rounds.
 5. SAFE TO MERGE: pushes and opens the pull request.
+6. Runs `pr-checks` on it.
 
 Still NOT SAFE after 2 fix rounds? It stops. Nothing is pushed, no pull request opens,
 and it lists the blockers left.
+
+### /pr-checks
+
+Waits for a pull request's CI checks and gets them green, or says exactly why not.
+
+- Waits in the background, max 5 minutes for checks to appear and 60 minutes in total.
+- Sorts each failure: caused by this PR, flaky, or not this PR's (it also fails on the
+  base branch).
+- Fixes only the failures this PR caused. Max 2 fix rounds, then it stops and reports.
+- Re-runs a flaky check once. Reports a failure that is not this PR's, and leaves it.
+- Never merges, never force-pushes, never skips or loosens a test.
+
+`ship-it` runs it after it opens the pull request. Run it by hand on any pull request.
 
 ### /answer-review
 
@@ -308,5 +323,7 @@ skills/
     scripts/pr-context.sh   copied from pr-review, so there is no outside dependency
   post-review/SKILL.md
   ship-it/SKILL.md
+  pr-checks/SKILL.md
+    scripts/wait-checks.sh   bounded wait for CI checks
   answer-review/SKILL.md
 ```

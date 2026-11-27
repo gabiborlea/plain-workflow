@@ -26,4 +26,4 @@ The scope named in the ticket or the PR is a contract.
 
 Comment only the non-obvious **why**. No comment that restates the code. No section banners. No docstring on a self-evident function. If the surrounding file has no comments, add none.
 
-Full rules: the `plain-speak` skill. Workflow skills: `write-ticket`, `explain-ticket`, `safe-review`, `post-review`, `ship-it`, `answer-review`.
+Full rules: the `plain-speak` skill. Workflow skills: `write-ticket`, `explain-ticket`, `safe-review`, `post-review`, `ship-it`, `pr-checks`, `answer-review`.

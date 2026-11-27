@@ -1,12 +1,12 @@
 ---
 name: ship-it
-description: Ship the current uncommitted changes end to end — draft and create a ticket, cut a branch, commit, run safe-review on the branch, fix blockers for at most 2 rounds, then push and open the pull request. Stops before the pull request if the branch is still not safe. Use when the user says "ship this", "ship it", "turn this into a ticket and PR", or invokes /ship-it.
+description: Ship the current uncommitted changes end to end — draft and create a ticket, cut a branch, commit, run safe-review on the branch, fix blockers for at most 2 rounds, then push, open the pull request and run pr-checks on it. Stops before the pull request if the branch is still not safe. Use when the user says "ship this", "ship it", "turn this into a ticket and PR", or invokes /ship-it.
 ---
 
 # ship-it
 
 Load `plain-speak` first. Load `write-ticket` for steps 1 and 2. Load `safe-review` for
-step 5.
+step 5. Load `pr-checks` for step 7.
 
 Take the uncommitted changes. Turn them into a ticket, a branch, a commit, a safe
 review, a push and a pull request, in that order. No pull request opens while
@@ -164,6 +164,11 @@ SAFE TO MERGE after <0, 1 or 2> fix rounds.
 
 Full sentences, max 20 words each. Print the pull request URL.
 
+## 7. Watch the checks
+
+Run `pr-checks` on the new pull request. Do not ask first: waiting for CI is part of
+shipping. Its fix rounds are its own, max 2, separate from the 2 in step 5.
+
 ## Report
 
 ```
@@ -171,5 +176,6 @@ SHIPPED  <PR URL>
   ticket   ENG-42 (In Progress)
   branch   ENG-42-<slug>
   review   SAFE TO MERGE, 1 fix round
+  checks   GREEN, 0 fix rounds   (or the pr-checks stop report)
   optional 3 findings not fixed (listed in the review above)
 ```
