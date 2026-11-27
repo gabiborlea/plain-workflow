@@ -26,7 +26,8 @@ If `FORK_POINT` is empty, run `git fetch origin <BASE_REF>` and the branch, then
 pre-existing problem looks introduced, and the noise comes straight back.
 
 No pull request? Use the working diff:
-`git diff $(git merge-base HEAD origin/<base>)...HEAD`
+`git diff $(git merge-base HEAD origin/<base>)...HEAD`. Then `FORK_POINT` is that
+merge-base and `HEAD_SHA` is `HEAD`.
 
 ### 2. Get the acceptance criteria
 
@@ -37,6 +38,28 @@ In order of preference:
 3. Ask the user in one line: `No acceptance criteria found. What must this PR do?`
 
 Without acceptance criteria, Gate 2 cannot test "breaks the feature". Do not skip this.
+
+### 2b. Collect the repo's gating rules
+
+The repo's own rules can block a merge. Read them from the files, not from memory.
+
+1. List the rule files that govern the diff: the root `CLAUDE.md` and `AGENTS.md`, and
+   each `CLAUDE.md` or `AGENTS.md` in a changed file's own folder or a parent folder.
+   Read them at the PR head, not from the local checkout.
+
+   ```bash
+   git diff --name-only <FORK_POINT>...<HEAD_SHA>
+   git ls-tree -r --name-only <HEAD_SHA> | grep -E '(^|/)(CLAUDE|AGENTS)\.md$'
+   git show <HEAD_SHA>:<rule file>
+   ```
+
+2. From those files, keep only the **gating rules**: a rule stated with `must`, `never`,
+   `mandatory`, `required`, `review-blocking`, or one that says CI fails or blocks.
+   A preference ("prefer", "try to", "usually") is not a gate.
+3. Keep only the gates that the diff touches: its paths, file types, APIs, or PR body.
+4. Note each gate with its `file:line`. Step 4 checks each one, and step 5 lists them.
+
+No gate applies? Say `RULES CHECK: no gating rule applies` in the output.
 
 ### 3. Run the configured engine
 
@@ -112,8 +135,8 @@ Every finding passes through three gates. Full rules and worked cases:
 - Crash or unhandled exception on a reachable path.
 - Silent error swallow that loses data or hides a failure.
 - Breaks existing behaviour that other code or users depend on.
-- Breaks a rule that the repo's `CLAUDE.md` calls mandatory or review-blocking. Example:
-  a new raw SQL string where the repo requires its query builder.
+- Breaks a gating rule from step 2b. Quote the rule and its `file:line`. Example: a new
+  raw SQL string where the repo's `CLAUDE.md` requires its query builder.
 - Migration out of sequence, where the repo orders migrations by a number or timestamp
   prefix. A new migration file uses a prefix that the base branch already has, or one
   that sorts before the newest file on the base branch. Compare against a fresh
@@ -134,35 +157,49 @@ or
 ```
 VERDICT: NOT SAFE
 
-BLOCKERS (2)
-  1. src/api.ts:91 — upload failure is swallowed — a 500 from S3 is caught and
-     logged, the caller gets 201, the file is gone
-     fix: rethrow, or return 502
+BLOCKERS (3)
+  1. src/api.ts:91
+     The caller gets 201, but the file is lost. Cause: a 500 from S3 is caught and logged.
+     Fix: rethrow, or return 502.
 
-  2. src/auth.ts:24 — token expiry uses < not <= — a token expiring this exact
-     second is accepted
-     fix: change < to <=
+  2. src/auth.ts:24
+     A token that expires this exact second is accepted. Cause: the check uses < not <=.
+     Fix: change < to <=.
+
+  3. src/api.ts:120
+     Any user can read another tenant's exports. Cause: the new route skips the tenant
+     check that api/CLAUDE.md:8 requires: "Every route must check the tenant."
+     Fix: call requireTenant() first, as the other routes do.
 
 AC CHECK
-  [x] Over 100 req/60s returns 429 — verified, ratelimit.ts:40
-  [ ] Retry-After header present — not set, ratelimit.ts:47
+  [x] Over 100 requests in 60 s returns 429. Proof: ratelimit.ts:40.
+  [ ] Retry-After header present. Gap: not set, ratelimit.ts:47.
+
+RULES CHECK
+  [x] CLAUDE.md:42 "New queries must use the query builder." Proof: no raw SQL added.
+  [ ] api/CLAUDE.md:8 "Every route must check the tenant." Gap: blocker 3.
 
 OPTIONAL (5, not blocking)
-  - src/api.ts:12 — `d` is a poor name for the payload
-  - src/util.ts:88 — this map could be a Set
-  - src/auth.ts:60 — no test for the expiry boundary
-  - src/api.ts:30 — duplicated with handler.ts:14
-  - src/config.ts:5 — magic number 100, could be named
+  - src/api.ts:12: `d` does not say what it holds.
+  - src/util.ts:88: this map only checks membership. A Set is clearer.
+  - src/auth.ts:60: no test covers the expiry boundary.
+  - src/api.ts:30: repeats handler.ts:14.
+  - src/config.ts:5: the limit 100 has no name.
 ```
 
 Rules for the output:
 
 - Verdict on line 1. Always.
-- One blocker per numbered item. Two lines: what and how it fails, then the fix.
-- `AC CHECK` lists every acceptance criterion with evidence or a gap.
+- One blocker per numbered item. Three lines: `file:line`, then the effect and the
+  cause, then the fix.
+- `AC CHECK` lists every acceptance criterion with proof or a gap.
+- `RULES CHECK` lists every gating rule from step 2b, quoted, with proof or a gap. A
+  gap from a break this diff introduced is a blocker of its own, which quotes the rule.
+  Gate 1 still applies: a break that was already there is a gap with `pre-existing`,
+  not a blocker.
 - `OPTIONAL` is **max 5 items, one line each**. More than 5 exist? Show the 5 that
   matter most and add `+N more dropped`.
-- No other sections. No summary paragraph. No praise.
+- No other sections. No summary paragraph. No praise. Plain-speak rules apply.
 
 Name the engine in the first line of the output when it was not `auto`'s top choice,
 so the user knows what produced the findings:

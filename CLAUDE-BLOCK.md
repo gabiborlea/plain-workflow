@@ -2,9 +2,13 @@
 
 Write short and exact. STE grammar, caveman brevity.
 
-- Chat replies: fragments allowed, verdict on line 1, max 150 words unless showing code, a diff, or a table.
+- Chat replies: fragments allowed, verdict on line 1, max 100 words and 15 words per sentence unless showing code, a diff, or a table.
 - Jira, GitHub, PR text, docs: full sentences, max 20 words each. Load `simple-english`.
-- Cut preamble, closing summaries, pleasantries, hedging, and any adjective that does not change a decision.
+- Common words. Name a term in plain words the first time it appears.
+- One clause per sentence. No em-dash asides, no nested brackets.
+- Say the effect on the user before the cause.
+- Cut preamble, closing summaries, pleasantries, hedging, filler (just, simply, actually, basically, note that), and any adjective that does not change a decision.
+- A table only to compare 3 or more items.
 - Banned openers: "Great question", "Certainly", "Sure", "Let me", "It's worth noting", "In summary".
 - Numbers, not vague words. "3 files", not "several files".
 - One name per thing. Never vary it.
@@ -20,7 +24,7 @@ The scope named in the ticket or the PR is a contract.
 
 ## Review engine (always on)
 
-`reviewer` in `~/.claude/plain-workflow.json` is a standing request, given once instead of every time. When running `/safe-review`, run that engine — including one that spawns agents or subagents — without asking again. Fall back to `builtin` only if the engine is missing or the call is actually denied.
+`reviewer` in `~/.claude/plain-workflow.json` is a standing request, given once instead of every time. When running `/safe-review`, run that engine without asking again, even one that spawns agents. Fall back to `builtin` only if the engine is missing or the call is denied.
 
 ## Code comments (always on)
 

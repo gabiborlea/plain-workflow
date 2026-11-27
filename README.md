@@ -88,7 +88,7 @@ The hook is `hooks/plain-speak-reminder.sh`. It returns the rules as
 `additionalContext` with `suppressOutput`, so nothing appears in your transcript.
 Silence it for one shell with `PLAIN_SPEAK_OFF=1`, or disable the plugin.
 
-**Voice:** STE grammar, caveman brevity. Chat replies allow fragments and cap at 150
+**Voice:** STE grammar, caveman brevity, plain words. Chat replies allow fragments and cap at 100
 words. Jira and GitHub text uses full sentences, max 20 words each.
 
 **Scope contract:** the ticket or PR scope is a contract. No "while I was in there"
@@ -172,6 +172,11 @@ Whatever the engine, every finding then passes three gates:
 2. **Blocking** — breaks an acceptance criterion, or is unsafe for main (security,
    leaked secret, data loss, crash, silent error swallow, broken existing behaviour).
 3. **Verified** — a `file:line` plus input → wrong result.
+
+Before the gates, it reads the repo's rule files: the root `CLAUDE.md` and `AGENTS.md`,
+and any in a folder above a changed file. It keeps the gating rules (must, never,
+mandatory, required, review-blocking, or enforced by CI) that the diff touches. The
+output lists each one under `RULES CHECK`, and a broken one is a blocker.
 
 Fail any gate and the finding drops to a list of at most 5 optional notes. The engine
 is swappable. The filter is not.

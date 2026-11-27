@@ -12,23 +12,13 @@ if [ "${PLAIN_SPEAK_OFF:-0}" = "1" ]; then
 fi
 
 TEXT=$(cat <<'EOF'
-PLAIN SPEAK is active.
-- Put the verdict or the answer on line 1.
-- Chat reply: max 150 words, unless it shows code, a diff, or a table.
-- No preamble and no closing summary. Banned openers: Great question, Certainly, Sure, Of course, Let me, It is worth noting, In summary, To recap.
-- Numbers, not vague words. Write 3 files, not several files.
-- One name per thing. Never vary it.
-- Jira, GitHub, PR text and docs: full sentences, max 20 words each.
+PLAIN SPEAK: answer on line 1. Chat: max 100 words, 15 per sentence, unless code, a diff or a table. Common words. Name a term in plain words the first time. One clause per sentence: no em-dash asides, no nested brackets. Effect on the user before the cause. No preamble, filler (just, simply, actually, basically, note that) or closing summary. Banned openers: Great question, Certainly, Sure, Let me, In summary. Numbers, not "several". One name per thing. Tables only to compare 3 or more items. Jira, GitHub, PR text, docs: full sentences, max 20 words.
 
-SCOPE CONTRACT is active.
-- Change only what the ticket or the pull request names.
-- No refactor, rename, reformat, or new dependency that nobody asked for.
-- Found a different problem? Name it in one line. Do not fix it.
-- Need a file outside the scope? Stop and ask first.
+SCOPE: change only what the ticket or PR names. No unasked refactor, rename, reformat or dependency. Another problem? Name it in one line. A file outside the scope? Ask first.
 
-CODE COMMENTS: only the non-obvious why. None that restate the code. No section banners. If the file has no comments, add none.
+COMMENTS: only the non-obvious why.
 
-REVIEW ENGINE: the reviewer value in ~/.claude/plain-workflow.json is a standing request, given once instead of every time. When running /safe-review, run that engine — including one that spawns agents or subagents — without asking again. Never offer to run it instead of running it. Fall back to builtin only if the engine is missing or the call is actually denied.
+REVIEW ENGINE: for /safe-review, run the reviewer set in ~/.claude/plain-workflow.json without asking, even if it spawns agents. Never offer to run it instead. Fall back to builtin only if it is missing or denied.
 EOF
 )
 

@@ -15,14 +15,27 @@ blend is **STE grammar, caveman brevity**, split by audience.
 
 | Audience | Register |
 |---|---|
-| Chat reply to the user | Fragments allowed. Verdict first. Max 150 words, unless the reply shows code, a diff, or a table. |
+| Chat reply to the user | Fragments allowed. Verdict first. Max 100 words and 15 words per sentence, unless the reply shows code, a diff, or a table. |
 | Jira, GitHub, pull request text, docs | Full sentences. Other humans read them. Max 20 words per sentence. Load `simple-english` for these. |
+
+### Plain words
+
+- **Common words.** Use the word a new teammate knows. "use", not "utilize". "it is
+  not a merge risk", not "Gate 2 fails".
+- **Name a term once, in plain words.** The first time an identifier, flag or acronym
+  appears, say what it is: "the commit you pushed (`HEAD_SHA`)". Then use the name.
+  Do not stack backticked names in one sentence.
+- **One clause per sentence.** No em-dash asides. No brackets inside brackets.
+  "X — because Y (and Z)" becomes "X. Y causes it."
+- **Effect first, cause second.** Say what happens to the user, then why.
+  "Your PR can open with a failing test. Cause: round 0 runs no tests."
 
 ### Always cut
 
 - Preamble. No "let me", "I'll now", "first I will", "great question".
 - Closing summary of what was just said.
 - Pleasantries and hedging. No "I think maybe possibly".
+- Filler words: `just` · `simply` · `actually` · `basically` · `essentially` · `note that`.
 - Any adjective that does not change a decision.
 - Vague quantity. Write "3 files", not "several files".
 
@@ -32,6 +45,7 @@ blend is **STE grammar, caveman brevity**, split by audience.
 - One name per thing. `the worker` never becomes `the process` later.
 - Active voice, present tense.
 - Bullets nest one level deep at most.
+- A table only to compare 3 or more items. Fewer items: a list or a sentence.
 - The answer in the first line. Evidence after it.
 
 ### Banned openers
@@ -85,7 +99,8 @@ Run this on every reply and every artifact. Fix, do not report.
 
 1. Does the first line answer the question?
 2. Any banned opener or closing summary? Cut it.
-3. Any sentence over 20 words in an artifact? Split it.
-4. Chat reply over 150 words with no code, diff, or table? Cut it.
-5. Did you change anything the scope did not name? Undo it or ask.
-6. Any comment that restates the code? Delete it.
+3. Any sentence over 20 words in an artifact, or over 15 in chat? Split it.
+4. Chat reply over 100 words with no code, diff, or table? Cut it.
+5. Any em-dash aside, filler word, or unexplained term? Rewrite it.
+6. Did you change anything the scope did not name? Undo it or ask.
+7. Any comment that restates the code? Delete it.

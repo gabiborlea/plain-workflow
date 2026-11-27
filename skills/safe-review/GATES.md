@@ -75,9 +75,11 @@ Exactly one of these. The list is closed. Only the user extends it.
 | Breaks a mandatory repo rule | A new raw SQL string where the repo's `CLAUDE.md` requires its query builder |
 | Migration out of sequence | The PR adds migration `0005_*`, but the base branch already has `0005_*` or `0006_*` |
 
-**Mandatory repo rule:** only a rule that the repo's `CLAUDE.md` states as mandatory,
-review-blocking, or "never". A style preference in `CLAUDE.md` is still optional. Quote
-the rule in the finding.
+**Mandatory repo rule:** only a gating rule from SKILL.md step 2b. That is a rule in a
+`CLAUDE.md` or `AGENTS.md` that governs the changed files, stated with must, never,
+mandatory, required or review-blocking, or one that says CI fails or blocks. A preference
+is still optional. Quote the rule and its `file:line` in the finding. Gate 1 still
+applies: only a break this diff introduced blocks.
 
 **Migration sequence:** applies only when the repo orders migrations by a number or
 timestamp prefix. Run `git fetch origin <BASE_REF>`, then list the migration directory
